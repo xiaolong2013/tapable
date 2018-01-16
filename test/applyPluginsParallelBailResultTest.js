@@ -5,21 +5,34 @@
 var Tapable = require("../lib/Tapable");
 var should = require("should");
 
+//创建测试的插件
 function makeTestPlugin(arr, index) {
 	var last;
 	var f = function() {
 		f.shouldNotBeCalled();
+	    //把参数变成数组
+	    console.log(arguments);
 		var args = Array.prototype.slice.call(arguments);
+		//往数组中的第一个位置添加元素
 		args.unshift(index);
+		//把参数赋值给变量 last
 		last = args;
+		//把参数推进 arr 中
 		arr.push(args);
+
+		console.log("args=="+args+"last=="+last);
 	};
 	f.issue = function() {
+
 		f.shouldBeCalled();
+		//从这个可以看出 last.pop() 一定是一个函数
+		console.log("issue"+last);
 		last.pop().apply(null, arguments);
+		//把 last
 		last = null;
 	};
 	f.shouldNotBeCalled = function() {
+		console.log("last==="+last);
 		if(last) throw new Error("Plugin " + index + " was called, but shouldn't be.");
 	};
 	f.shouldBeCalled = function() {
@@ -41,17 +54,24 @@ function makeTestPlugin(arr, index) {
 	return f;
 }
 
+//流程是通了 但是 感觉挺绕的
 describe("applyPluginsParallelBailResult", function() {
 	it("should call all handlers", function() {
 		var tapable = new Tapable();
 		var log = [];
+		//因为makeTestPlugin 都是单独调用 所以每次 last 都为 undefined
+		//因为这个是 makeTestPlugin 函数局部变量
+
 		var p1 = makeTestPlugin(log, 1);
 		var p2 = makeTestPlugin(log, 2);
 		var p3 = makeTestPlugin(log, 3);
 		var p4 = makeTestPlugin(log, 4);
 		var result = makeTestPlugin(log, 0);
+		//开始注册插件
 		tapable.plugin("test", p1);
+		//开始注册插件
 		tapable.plugin("test", p2);
+		//开始注册插件
 		tapable.plugin("xxxx", p3);
 		tapable.plugin("test", p4);
 		tapable.applyPluginsParallelBailResult("test", 1, 2, result);
