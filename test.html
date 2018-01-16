@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+     <!-- 引入 Tapable.js 文件 -->
+     <script src="./lib/Tapable.js"></script>
+  </head>
+
+
+  <body>
+     
+     <script>
+
+
+        //整个插件的结构是
+
+        /*
+          // 数组里面存放的是 这个name 对应的 handler 即执行函数
+          // 这种思想跟发布订阅很像
+          //   
+          this._plugins = {
+             name : [] 
+          };
+        */
+
+        var instance = new Tapable();
+         
+        instance.aa = 12313; 
+
+        //1. 如果是实例的话  会把 实例 原型 静态属性 都遍历出来
+        //2. 如果是构造函数的话 会把 构造函数的静态属性 遍历出来
+
+        for(var item in instance){
+            console.log(item);
+        } 
+
+        
+        //注册一个插件
+        instance.plugin("option",function(){
+             
+              console.log(2);
+        });
+
+
+        //执行插件
+        // 先有这个插件的话 就执行
+        if(instance.hasPlugins("option")){
+
+        	 //执行 里面的插件  没有返回值
+             instance.applyPlugins("option"); 
+        }
+
+         
+
+     </script>  
+  </body>
+</html>
